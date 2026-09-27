@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>表の作業を自動にする見本</title>
+<meta name="description" content="スプレッドシートの手作業を自動にする見本。触って動きを確かめられます。">
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#23211d;--sub:#6b665d;--line:#e3dfd6;--acc:#1f6f5c;--acc2:#e8f3ef;--warn:#b4541f;--warn2:#fbeee6;--code:#f2f0ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181a19;--card:#212423;--ink:#ecebe6;--sub:#a4a29b;--line:#343836;--acc:#5fc2a6;--acc2:#1f332d;--warn:#f0a070;--warn2:#3a2a20;--code:#1b1d1c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 "Hiragino Sans","Noto Sans JP","Yu Gothic UI",sans-serif}
+main{max-width:880px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:26px;line-height:1.4;margin:0 0 8px}
+h2{font-size:20px;margin:48px 0 8px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:20px 0 6px}
+p{margin:8px 0}
+.lead{color:var(--sub)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
+.demo{display:none}.demo.on{display:block}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:600}
+td input{width:100%;border:0;background:transparent;color:inherit;font:inherit}
+.scroll{overflow-x:auto}
+label{display:block;font-size:13px;color:var(--sub)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.grid input,.grid select,textarea{width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:inherit;font-size:14px}
+.btn{display:inline-block;margin:12px 0;background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 16px;font:inherit;cursor:pointer}
+.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.box{border:1px dashed var(--line);border-radius:8px;padding:10px;font-size:14px;min-height:60px}
+.box td,.box th{white-space:nowrap}
+.box b{display:block;font-size:12px;color:var(--sub);font-weight:600}
+.new{background:var(--acc2)}
+pre{background:var(--code);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px;line-height:1.55;max-height:420px}
+details summary{cursor:pointer;color:var(--acc);font-size:14px;margin-top:8px}
+.mail{white-space:pre-wrap;font-family:inherit;font-size:13px;background:var(--code);border-radius:6px;padding:8px;margin:6px 0}
+.inv{border:1px solid var(--line);border-radius:6px;padding:12px;font-size:13px;background:var(--card)}
+.inv .t{font-size:18px;letter-spacing:.3em;text-align:center;margin-bottom:8px}
+.tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;background:var(--acc2);color:var(--acc);margin-right:4px}
+.tag.w{background:var(--warn2);color:var(--warn)}
+.q{cursor:pointer}.q.on{outline:2px solid var(--acc)}
+.muted{color:var(--sub);font-size:13px}
+ul{padding-left:1.2em}
+.price td:last-child{text-align:right;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 0}
+.tabs button{text-align:left;border-radius:10px;padding:10px 12px;line-height:1.5;font-size:13.5px}
+.tabs button b{display:block;font-size:15px;margin-bottom:2px}
+.tabs button[aria-selected="true"] b{color:#fff}
+h2.first{border-top:0;margin-top:28px}
+.ba{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:12px 0}
+.ba dt{font-size:13px;font-weight:600;color:var(--sub);padding-top:2px}
+.ba dt+dd+dt{color:var(--acc)}
+.ba dd{margin:0}
+.try{background:var(--acc2);border-radius:8px;padding:8px 10px;margin:0 0 12px;font-size:14px}
+.faq .fq{font-weight:600;margin:16px 0 2px}
+.faq .fq::before{content:'Q. ';color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+<h1>毎月くり返している表の作業を、ボタン1つで終わらせます</h1>
+<p class="lead">ご覧いただきありがとうございます。Google スプレッドシートや Excel で毎回くり返している転記・集計・書類作成・メール送信などを自動化しています。よくある作業を5つ見本にしましたので、このページで実際にお試しください。</p>
+
+<h2 class="first">次のような作業はありませんか</h2>
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-t="d1"><b>転記</b>同じ内容を、予定表・台帳・メールの3か所に入力している</button>
+<button role="tab" data-t="d2"><b>請求書</b>請求書を1枚ずつ作成し、PDFにしてメールに添付している</button>
+<button role="tab" data-t="d3"><b>問い合わせ</b>問い合わせを1件ずつ読み、急ぎかどうか判断して返信している</button>
+<button role="tab" data-t="d4"><b>期限の管理</b>保険の更新や支払いの期限を、カレンダーや記憶で管理している</button>
+<button role="tab" data-t="d5"><b>月次の集計</b>毎月CSVを取り込み、同じ集計表とグラフを作り直している</button>
+</div>
+
+<section class="demo on" id="d1">
+<h2>同じ内容を複数の表に転記している</h2>
+<dl class="ba"><dt>現在</dt><dd>予定表・台帳・担当者へのメールの3か所に、同じ内容を入力している。入力ミスで表同士が食い違うことがある。</dd>
+<dt>導入後</dt><dd>受付表に1回入力してボタンを押すと、予定表と台帳に行が追加され、担当者宛てのメールが Gmail の下書き（送信前の状態）に作成されます。</dd></dl>
+<div class="card">
+<p class="try">お客様名などを変更して「転記する」を押してください。同じ内容のまま再度押しても、二重には登録されません。</p>
+<div class="grid">
+<div><label>日付</label><input id="t_date" type="date"></div>
+<div><label>お客様名</label><input id="t_cus" value="山田商事"></div>
+<div><label>出発地</label><input id="t_from" value="品川"></div>
+<div><label>到着地</label><input id="t_to" value="横浜"></div>
+<div><label>担当者</label><select id="t_who"><option>佐藤</option><option>田中</option></select></div>
+<div><label>備考</label><input id="t_memo" value="午前中"></div>
+</div>
+<button class="btn" id="t_go">転記する</button>
+<div class="out">
+<div class="box"><b>予定表</b><div id="t_o1" class="scroll"></div></div>
+<div class="box"><b>台帳（番号は自動採番）</b><div id="t_o2" class="scroll"></div></div>
+<div class="box"><b>担当者宛てメール（下書き）</b><div id="t_o3"></div></div>
+</div>
+</div>
+<details><summary>プログラムを見る（Apps Script）</summary><pre>/**
+ * 受付シートの1行を、3か所へ自動で書き写す。
+ *   ・予定表（日付と担当）
+ *   ・台帳（通し番号をふって記録）
+ *   ・担当者あての依頼メール（Gmail の下書き。送信は人が確認してから）
+ *
+ * 使い方：受付シートに1行入れて、C列の「状態」が空の行に対して
+ *   メニュー「自動化 → 未処理の行を書き写す」を押す。
+ *   すんだ行は「状態」に「済 2026/09/27 10:15」と入るので、二重に書き写されない。
+ */
+
+const SHEET_UKETSUKE = &#x27;受付&#x27;;
+const SHEET_YOTEI = &#x27;予定表&#x27;;
+const SHEET_DAICHO = &#x27;台帳&#x27;;
+const SHEET_TANTO = &#x27;担当者&#x27;; // A:名前 B:メールアドレス
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu(&#x27;自動化&#x27;)
+    .addItem(&#x27;未処理の行を書き写す&#x27;, &#x27;tenkiAll&#x27;)
+    .addToUi();
+}
+
+function tenkiAll() {
+  const ss = SpreadsheetApp.getActive();
+  const src = ss.getSheetByName(SHEET_UKETSUKE);
+  const values = src.getDataRange().getValues();
+  const header = values[0];
+  const col = name =&gt; {
+    const i = header.indexOf(name);
+    if (i &lt; 0) throw new Error(&#x27;受付シートに「&#x27; + name + &#x27;」の列がありません&#x27;);
+    return i;
+  };
+  const c = {
+    date: col(&#x27;日付&#x27;), customer: col(&#x27;お客様&#x27;), from: col(&#x27;出発地&#x27;),
+    to: col(&#x27;到着地&#x27;), tanto: col(&#x27;担当&#x27;), memo: col(&#x27;備考&#x27;), status: col(&#x27;状態&#x27;),
+  };
+  const mails = loadTanto_(ss);
+  const daicho = ss.getSheetByName(SHEET_DAICHO);
+  let seq = Math.max(daicho.getLastRow() - 1, 0);
+  let done = 0;
+
+  for (let r = 1; r &lt; values.length; r++) {
+    const row = values[r];
+    if (row[c.status] || !row[c.customer]) continue;
+
+    ss.getSheetByName(SHEET_YOTEI).appendRow([row[c.date], row[c.tanto], row[c.customer], row[c.from] + &#x27; → &#x27; + row[c.to]]);
+
+    seq += 1;
+    const no = &#x27;K-&#x27; + Utilities.formatDate(new Date(), &#x27;Asia/Tokyo&#x27;, &#x27;yyMM&#x27;) + &#x27;-&#x27; + String(seq).padStart(3, &#x27;0&#x27;);
+    daicho.appendRow([no, row[c.date], row[c.customer], row[c.from], row[c.to], row[c.tanto], row[c.memo]]);
+
+    const to = mails[row[c.tanto]];
+    if (to) {
+      const d = Utilities.formatDate(new Date(row[c.date]), &#x27;Asia/Tokyo&#x27;, &#x27;M月d日&#x27;);
+      GmailApp.createDraft(to, &#x27;【依頼】&#x27; + d + &#x27; &#x27; + row[c.customer] + &#x27;様&#x27;,
+        row[c.tanto] + &#x27;さん\n\n次の件をお願いします。\n\n&#x27; +
+        &#x27;番号：&#x27; + no + &#x27;\n日付：&#x27; + d + &#x27;\nお客様：&#x27; + row[c.customer] + &#x27;様\n&#x27; +
+        &#x27;経路：&#x27; + row[c.from] + &#x27; → &#x27; + row[c.to] + &#x27;\n備考：&#x27; + (row[c.memo] || &#x27;なし&#x27;) + &#x27;\n&#x27;);
+    }
+
+    src.getRange(r + 1, c.status + 1)
+      .setValue(&#x27;済 &#x27; + Utilities.formatDate(new Date(), &#x27;Asia/Tokyo&#x27;, &#x27;yyyy/MM/dd HH:mm&#x27;));
+    done += 1;
+  }
+  SpreadsheetApp.getActive().toast(done + &#x27;件を書き写しました（メールは下書きに入っています）&#x27;);
+}
+
+function loadTanto_(ss) {
+  const out = {};
+  ss.getSheetByName(SHEET_TANTO).getDataRange().getValues().slice(1)
+    .forEach(([name, mail]) =&gt; { if (name &amp;&amp; mail) out[name] = mail; });
+  return out;
+}
+</pre></details>
+</section>
+
+<section class="demo" id="d2">
+<h2>請求書を1枚ずつ作成し、メールに添付している</h2>
+<dl class="ba"><dt>現在</dt><dd>取引先ごとにひな形を開いて社名と金額を入力し、PDFで保存して、メールに添付している。</dd>
+<dt>導入後</dt><dd>請求一覧でボタンを押すと、取引先ごとの請求書PDFが作成され、PDFを添付したメールが Gmail の下書きに並びます。送信はご確認のうえご自身で行うため、宛先や金額の誤りに送信前に気づけます。</dd></dl>
+<div class="card">
+<p class="try">表の金額や社名を変更して「請求書を作成」を押してください。メールアドレスが空欄の取引先は作成されません。</p>
+<div class="scroll"><table id="s_tbl"><thead><tr><th>請求番号</th><th>会社名</th><th>金額</th><th>メールアドレス</th></tr></thead><tbody></tbody></table></div>
+<button class="btn" id="s_go">請求書を作成</button>
+<p class="muted" id="s_msg"></p>
+<div class="out" id="s_out"></div>
+</div>
+<details><summary>プログラムを見る（Apps Script）</summary><pre>/**
+ * 請求一覧の1行ずつを、Google ドキュメントのひな形に差し込んで PDF にし、
+ * その PDF を添付した Gmail の下書きを作る。送信はしない（人が見てから送る）。
+ *
+ * ひな形のドキュメントには {{会社名}} {{金額}} {{請求番号}} {{支払期限}} のように書いておく。
+ * 一覧の見出しと {{ }} の中の名前が同じなら、列が増えてもそのまま差し込まれる。
+ */
+
+const TEMPLATE_DOC_ID = &#x27;ここにひな形ドキュメントのID&#x27;;
+const OUTPUT_FOLDER_ID = &#x27;ここにPDFを置くフォルダのID&#x27;;
+
+function makeInvoices() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(&#x27;請求一覧&#x27;);
+  const [header, ...rows] = sheet.getDataRange().getValues();
+  const iMail = header.indexOf(&#x27;メール&#x27;);
+  const iDone = header.indexOf(&#x27;下書き&#x27;);
+  const folder = DriveApp.getFolderById(OUTPUT_FOLDER_ID);
+
+  rows.forEach((row, k) =&gt; {
+    if (row[iDone] || !row[iMail]) return;
+
+    const copy = DriveApp.getFileById(TEMPLATE_DOC_ID).makeCopy(&#x27;tmp_&#x27; + k, folder);
+    const doc = DocumentApp.openById(copy.getId());
+    const body = doc.getBody();
+    header.forEach((name, j) =&gt; {
+      const v = row[j] instanceof Date
+        ? Utilities.formatDate(row[j], &#x27;Asia/Tokyo&#x27;, &#x27;yyyy年M月d日&#x27;)
+        : typeof row[j] === &#x27;number&#x27; ? row[j].toLocaleString(&#x27;ja-JP&#x27;) : String(row[j]);
+      body.replaceText(&#x27;\\{\\{&#x27; + name + &#x27;\\}\\}&#x27;, v);
+    });
+    doc.saveAndClose();
+
+    const fileName = &#x27;請求書_&#x27; + row[header.indexOf(&#x27;請求番号&#x27;)] + &#x27;_&#x27; + row[header.indexOf(&#x27;会社名&#x27;)] + &#x27;.pdf&#x27;;
+    const pdf = copy.getAs(&#x27;application/pdf&#x27;).setName(fileName);
+    folder.createFile(pdf);
+    copy.setTrashed(true); // 作業用のコピーはゴミ箱へ（30日は戻せる）
+
+    GmailApp.createDraft(row[iMail], &#x27;請求書送付のご案内（&#x27; + row[header.indexOf(&#x27;請求番号&#x27;)] + &#x27;）&#x27;,
+      row[header.indexOf(&#x27;会社名&#x27;)] + &#x27;\nご担当者様\n\nいつもお世話になっております。\n&#x27; +
+      &#x27;請求書を添付いたしましたので、ご確認をお願いいたします。\n&#x27;,
+      { attachments: [pdf] });
+
+    sheet.getRange(k + 2, iDone + 1).setValue(new Date());
+  });
+}
+</pre></details>
+</section>
+
+<section class="demo" id="d3">
+<h2>問い合わせを1件ずつ読んで振り分けている</h2>
+<dl class="ba"><dt>現在</dt><dd>届いた問い合わせをすべて読み、急ぎかどうかを判断して、返信を一から書いている。</dd>
+<dt>導入後</dt><dd>問い合わせが届くと AI が内容を読み、「見積もり」「不具合」などに分類します。急ぎのものは担当者へすぐにメールで通知し、返信文の下書きもシートに入ります。</dd></dl>
+<div class="card">
+<p class="try">左の問い合わせを1つ選ぶと、右側に分類の結果と返信文の下書きが表示されます（表示内容は見本として用意したものです）。</p>
+<div class="out">
+<div id="a_list"></div>
+<div class="box" id="a_out"><b>分類の結果</b>左の問い合わせを選ぶと表示されます</div>
+</div>
+</div>
+<details><summary>プログラムを見る（Apps Script）</summary><pre>/**
+ * お問い合わせフォームの回答を、生成 AI で仕分けてシートに書き足す。
+ *   種類（見積もり・不具合・解約・その他）／急ぎかどうか／返信の下書き
+ *
+ * フォームの送信をきっかけに動く（トリガー「フォーム送信時」に onFormSubmit を登録）。
+ * API キーはコードに書かず、スクリプト プロパティ AI_API_KEY に依頼者ご自身で入れていただく。
+ * ここでは Anthropic の API を使う例。Gemini や OpenAI でも、呼び出し部分を差し替えるだけで動く。
+ */
+
+const MODEL = &#x27;claude-haiku-4-5-20251001&#x27;; // 仕分けは安くて速いモデルで足りる
+
+function onFormSubmit(e) {
+  const sheet = e.range.getSheet();
+  const row = e.range.getRow();
+  const text = e.namedValues[&#x27;お問い合わせ内容&#x27;][0];
+
+  const result = classify_(text);
+  const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const put = (name, v) =&gt; {
+    let c = header.indexOf(name) + 1;
+    if (c === 0) { c = header.length + 1; sheet.getRange(1, c).setValue(name); header.push(name); }
+    sheet.getRange(row, c).setValue(v);
+  };
+  put(&#x27;種類&#x27;, result.category);
+  put(&#x27;急ぎ&#x27;, result.urgent ? &#x27;急ぎ&#x27; : &#x27;&#x27;);
+  put(&#x27;返信の下書き&#x27;, result.reply);
+
+  // 急ぎのときだけ、社内の担当者へ知らせる（お客様へは送らない）
+  const notifyTo = PropertiesService.getScriptProperties().getProperty(&#x27;NOTIFY_TO&#x27;);
+  if (result.urgent &amp;&amp; notifyTo) {
+    MailApp.sendEmail(notifyTo, &#x27;【急ぎの問い合わせ】&#x27; + result.category, text);
+  }
+}
+
+function classify_(text) {
+  const key = PropertiesService.getScriptProperties().getProperty(&#x27;AI_API_KEY&#x27;);
+  const prompt =
+    &#x27;次のお問い合わせを読んで、JSON だけを返してください。\n&#x27; +
+    &#x27;{&quot;category&quot;: &quot;見積もり|不具合|解約|その他&quot;, &quot;urgent&quot;: true/false, &quot;reply&quot;: &quot;返信の下書き（200字以内・丁寧語）&quot;}\n&#x27; +
+    &#x27;急ぎとは、業務が止まっている・今日中の対応を求めている・強い不満がある場合です。\n\n&#x27; +
+    &#x27;お問い合わせ：\n&#x27; + text;
+
+  const res = UrlFetchApp.fetch(&#x27;https://api.anthropic.com/v1/messages&#x27;, {
+    method: &#x27;post&#x27;,
+    contentType: &#x27;application/json&#x27;,
+    headers: { &#x27;x-api-key&#x27;: key, &#x27;anthropic-version&#x27;: &#x27;2023-06-01&#x27; },
+    payload: JSON.stringify({ model: MODEL, max_tokens: 600, messages: [{ role: &#x27;user&#x27;, content: prompt }] }),
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) throw new Error(&#x27;AI の呼び出しに失敗：&#x27; + res.getContentText());
+  const out = JSON.parse(res.getContentText()).content[0].text;
+  return JSON.parse(out.slice(out.indexOf(&#x27;{&#x27;), out.lastIndexOf(&#x27;}&#x27;) + 1));
+}
+</pre></details>
+</section>
+
+<section class="demo" id="d4">
+<h2>期限を記憶やカレンダーで管理している</h2>
+<dl class="ba"><dt>現在</dt><dd>保険の更新や支払いの期限に、気づくのが遅れることがある。</dd>
+<dt>導入後</dt><dd>毎朝、期限の一覧を自動で確認し、30日前・7日前・前日・当日・期限切れの項目を1通のメールでお知らせします。該当がない日はメールを送りません。</dd></dl>
+<div class="card">
+<p class="try">つまみを動かして日付を変えると、その日の朝に届くメールが表示されます。</p>
+<div class="scroll"><table id="k_tbl"><thead><tr><th>項目</th><th>期限</th><th>対応</th></tr></thead><tbody></tbody></table></div>
+<label style="margin-top:12px">今日：<span id="k_today"></span></label>
+<input type="range" id="k_slide" min="-10" max="40" value="0" style="width:100%">
+<div class="box" style="margin-top:8px"><b>この日の朝に届くメール</b><div id="k_out"></div></div>
+</div>
+<details><summary>プログラムを見る（Apps Script）</summary><pre>/**
+ * 期限の近いものを、毎朝まとめて知らせる。
+ *   契約の更新日・在庫の賞味期限・資格の有効期限・請求の支払期限など、列の名前を変えるだけで使い回せる。
+ *
+ * 「期限」の列が今日から DAYS_BEFORE 日以内で、「対応」が空の行を拾う。
+ * 同じものを毎日しつこく知らせないように、30日前・7日前・前日・当日・過ぎたもの、の節目だけ知らせる。
+ * トリガー：時間主導型 → 日付ベース → 午前8〜9時 に notifyDeadlines を登録。
+ */
+
+const SHEET_NAME = &#x27;期限一覧&#x27;;
+const NOTICE_DAYS = [30, 7, 1, 0];
+const NOTIFY_TO = &#x27;ここに知らせる先のメールアドレス&#x27;;
+
+function notifyDeadlines() {
+  const [header, ...rows] = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME).getDataRange().getValues();
+  const iName = header.indexOf(&#x27;項目&#x27;), iDue = header.indexOf(&#x27;期限&#x27;), iDone = header.indexOf(&#x27;対応&#x27;);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const lines = { over: [], hit: [] };
+  rows.forEach(r =&gt; {
+    if (r[iDone] || !(r[iDue] instanceof Date)) return;
+    const due = new Date(r[iDue]); due.setHours(0, 0, 0, 0);
+    const left = Math.round((due - today) / 86400000);
+    const d = Utilities.formatDate(due, &#x27;Asia/Tokyo&#x27;, &#x27;M/d&#x27;);
+    if (left &lt; 0) lines.over.push(&#x27;・&#x27; + r[iName] + &#x27;（&#x27; + d + &#x27;・&#x27; + (-left) + &#x27;日過ぎ）&#x27;);
+    else if (NOTICE_DAYS.includes(left)) lines.hit.push(&#x27;・&#x27; + r[iName] + &#x27;（&#x27; + d + &#x27;・&#x27; + (left === 0 ? &#x27;今日&#x27; : &#x27;あと&#x27; + left + &#x27;日&#x27;) + &#x27;）&#x27;);
+  });
+  if (!lines.over.length &amp;&amp; !lines.hit.length) return; // 何もない日は送らない
+
+  const body =
+    (lines.over.length ? &#x27;■ 期限を過ぎたもの\n&#x27; + lines.over.join(&#x27;\n&#x27;) + &#x27;\n\n&#x27; : &#x27;&#x27;) +
+    (lines.hit.length ? &#x27;■ 期限が近いもの\n&#x27; + lines.hit.join(&#x27;\n&#x27;) + &#x27;\n\n&#x27; : &#x27;&#x27;) +
+    &#x27;対応したら「対応」の列に日付か「済」を入れてください。知らせが止まります。\n&#x27; +
+    SpreadsheetApp.getActive().getUrl();
+  MailApp.sendEmail(NOTIFY_TO, &#x27;期限のお知らせ（&#x27; + (lines.over.length + lines.hit.length) + &#x27;件）&#x27;, body);
+}
+</pre></details>
+</section>
+
+<section class="demo" id="d5">
+<h2>毎月、同じ集計表を作り直している</h2>
+<dl class="ba"><dt>現在</dt><dd>毎月CSVを取り込み、数式をコピーしてグラフを作り直している。数式のコピー漏れで、数字がずれることもある。</dd>
+<dt>導入後</dt><dd>CSVを所定のフォルダに置いてボタンを押すと、担当者別・商品別の合計とグラフが入った月別のシートが作成されます。</dd></dl>
+<div class="card">
+<p class="try">明細の金額や担当者を変更して「集計する」を押してください。</p>
+<textarea id="c_in" rows="8"></textarea>
+<button class="btn" id="c_go">集計する</button>
+<div class="out"><div id="c_t1"></div><div id="c_t2"></div></div>
+<div id="c_chart"></div>
+</div>
+<details><summary>プログラムを見る（Apps Script）</summary><pre>/**
+ * 売上の明細（毎月 CSV で落としてくるもの）から、月次の集計表とグラフを作る。
+ *
+ * 1. 「取込」シートに CSV を貼る（またはフォルダに置いた CSV を読み込む importLatestCsv）
+ * 2. makeMonthlyReport を押すと、「月次_2026-09」のようなシートができ、
+ *    担当者別・商品別の売上と、棒グラフが並ぶ
+ * 毎月同じ形のシートができるので、作り直しの手間と、式のコピー漏れがなくなる。
+ */
+
+const CSV_FOLDER_ID = &#x27;ここにCSVを置くフォルダのID&#x27;;
+
+function importLatestCsv() {
+  const files = DriveApp.getFolderById(CSV_FOLDER_ID).getFilesByType(MimeType.CSV);
+  let latest = null;
+  while (files.hasNext()) {
+    const f = files.next();
+    if (!latest || f.getLastUpdated() &gt; latest.getLastUpdated()) latest = f;
+  }
+  if (!latest) throw new Error(&#x27;フォルダに CSV がありません&#x27;);
+  // 会計ソフトの CSV は Shift_JIS のことが多い
+  const text = latest.getBlob().getDataAsString(&#x27;Shift_JIS&#x27;);
+  const data = Utilities.parseCsv(text);
+  const sheet = SpreadsheetApp.getActive().getSheetByName(&#x27;取込&#x27;);
+  sheet.clearContents();
+  sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+}
+
+function makeMonthlyReport() {
+  const ss = SpreadsheetApp.getActive();
+  const [header, ...rows] = ss.getSheetByName(&#x27;取込&#x27;).getDataRange().getValues();
+  const iDate = header.indexOf(&#x27;日付&#x27;), iWho = header.indexOf(&#x27;担当&#x27;),
+        iItem = header.indexOf(&#x27;商品&#x27;), iAmt = header.indexOf(&#x27;金額&#x27;);
+
+  const month = Utilities.formatDate(new Date(rows[0][iDate]), &#x27;Asia/Tokyo&#x27;, &#x27;yyyy-MM&#x27;);
+  const sum = key =&gt; {
+    const m = {};
+    rows.forEach(r =&gt; { m[r[key]] = (m[r[key]] || 0) + Number(r[iAmt]); });
+    return Object.entries(m).sort((a, b) =&gt; b[1] - a[1]);
+  };
+
+  const name = &#x27;月次_&#x27; + month;
+  const old = ss.getSheetByName(name);
+  if (old) ss.deleteSheet(old); // 同じ月を作り直すときは上書き
+  const out = ss.insertSheet(name);
+
+  const byWho = sum(iWho), byItem = sum(iItem);
+  out.getRange(1, 1, 1, 2).setValues([[&#x27;担当&#x27;, &#x27;売上&#x27;]]);
+  out.getRange(2, 1, byWho.length, 2).setValues(byWho);
+  out.getRange(1, 4, 1, 2).setValues([[&#x27;商品&#x27;, &#x27;売上&#x27;]]);
+  out.getRange(2, 4, byItem.length, 2).setValues(byItem);
+  out.getRange(&#x27;B:B&#x27;).setNumberFormat(&#x27;#,##0&#x27;);
+  out.getRange(&#x27;E:E&#x27;).setNumberFormat(&#x27;#,##0&#x27;);
+
+  out.insertChart(out.newChart().asBarChart()
+    .addRange(out.getRange(1, 1, byWho.length + 1, 2))
+    .setPosition(2, 7, 0, 0).setOption(&#x27;title&#x27;, month + &#x27; 担当者別の売上&#x27;).build());
+}
+</pre></details>
+</section>
+
+<h2>ご依頼の流れ</h2>
+<ol>
+<li>現在の作業手順と、表の見本をメッセージでお送りください。氏名や金額などは伏せていただいて構いません。</li>
+<li>自動化できる範囲とお見積もりを、文章でご回答します。ここまでは無料です。</li>
+<li>ご依頼後、いただいた見本で動作を確認し、操作手順書を添えて納品します。</li>
+<li>納品後14日以内に見つかった不具合は、無料で修正いたします。</li>
+</ol>
+<p>やり取りはすべてメッセージで承ります（通話での打ち合わせは行っておりません）。決まった内容が文字で残るため、認識の食い違いを防げます。返信は24時間以内にいたします。</p>
+
+<h2>納品物</h2>
+<ul>
+<li>プログラム（お客様の Google アカウント内に設置します）</li>
+<li>設定済みのスプレッドシート</li>
+<li>動作確認の記録</li>
+<li>操作手順書（使い方と、うまく動かないときの確認方法）</li>
+</ul>
+
+<h2>料金の目安</h2>
+<table class="price">
+<tr><td>作業1つの自動化（上の見本1つ程度）</td><td>10,000円〜</td></tr>
+<tr><td>複数の作業をつなげた自動化（例：PDF作成とメール添付）</td><td>30,000円〜</td></tr>
+<tr><td>AI を組み込んだ自動化</td><td>50,000円〜</td></tr>
+<tr><td>納品後の保守（列の追加など小さな変更）</td><td>月5,000円〜</td></tr>
+</table>
+<p class="muted">AI を組み込む場合は、AI の利用料（Anthropic、Google など）が別途かかり、お客様のアカウントから直接のお支払いとなります。問い合わせの分類なら1件1円未満、月300件で100円ほどです。アカウントの作成方法は手順書でご案内します。</p>
+
+<h2>制作に AI を活用しています</h2>
+<p>プログラムの作成に AI（Claude）を活用しているため、短い納期と抑えた料金でお引き受けできます。納品前には、空欄の行やボタンの二度押しなども含めて動作を確認します。</p>
+<p>メールの送信やデータの削除など取り消せない操作は、最後にお客様ご自身が実行する形を基本としています。パスワードはお預かりしません。</p>
+
+<h2>よくある質問</h2>
+<div class="faq">
+<p class="fq">何を頼めばよいか決まっていなくても、相談できますか。</p>
+<p>はい。現在の作業手順と、どんな形になれば楽になるかをお知らせください。自動化できる範囲を整理してご回答します。</p>
+<p class="fq">Excel のままでも使えますか。</p>
+<p>はい。Excel のマクロ（VBA）または Python で対応します。内容によっては、Google スプレッドシートへの移行をご提案することもあります。</p>
+<p class="fq">社内のデータを渡すのが不安です。</p>
+<p>氏名・メールアドレス・金額などを伏せた見本データで制作できます。お預かりしたデータは、納品後に削除いたします。</p>
+<p class="fq">納品後に表の列が増えた場合はどうなりますか。</p>
+<p>契約時に決めた範囲の不具合は無料で修正します。列の追加や手順の変更は別途お見積もりとなります（月額の保守プランもあります）。</p>
+</div>
+
+<h2>ご依頼・ご相談</h2>
+<p>ランサーズのメッセージから、お気軽にご相談ください（プロフィールの URL は準備中です）。</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const yen = n => Number(n).toLocaleString('ja-JP');
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+  document.querySelectorAll('.demo').forEach(d => d.classList.toggle('on', d.id === b.dataset.t));
+  $(b.dataset.t).scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+
+// 1 転記
+const T = {yotei: [], daicho: [], seq: 0};
+const d0 = new Date(); d0.setDate(d0.getDate() + 3); $('t_date').value = d0.toISOString().slice(0, 10);
+const tbl = (head, rows, last) => '<table><tr>' + head.map(h => '<th>' + h + '</th>').join('') + '</tr>' +
+  rows.map((r, i) => '<tr' + (i === rows.length - 1 && last ? ' class="new"' : '') + '>' + r.map(c => '<td>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</table>';
+$('t_go').onclick = () => {
+  const v = k => $('t_' + k).value.trim();
+  if (!v('cus')) { $('t_o3').textContent = 'お客様名が空欄の行は転記しません'; return; }
+  const sig = ['date', 'cus', 'from', 'to', 'who', 'memo'].map(v).join('|');
+  if (sig === T.last) { $('t_o3').innerHTML = '<span class="muted">この行は転記済みです（0件）。内容を変えると、新しい行として転記されます。</span>'; return; }
+  T.last = sig;
+  const dt = new Date(v('date')); const md = (dt.getMonth() + 1) + '月' + dt.getDate() + '日';
+  T.seq += 1;
+  const no = 'K-' + String(new Date().getFullYear()).slice(2) + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + String(T.seq).padStart(3, '0');
+  T.yotei.push([md, v('who'), v('cus'), v('from') + ' → ' + v('to')]);
+  T.daicho.push([no, md, v('cus'), v('who')]);
+  $('t_o1').innerHTML = tbl(['日付', '担当', 'お客様', '経路'], T.yotei.slice(-3), true);
+  $('t_o2').innerHTML = tbl(['番号', '日付', 'お客様', '担当'], T.daicho.slice(-3), true);
+  const mail = (v('who') === '佐藤' ? 'sato' : 'tanaka') + '@example.com';
+  $('t_o3').innerHTML = '<div class="mail">宛先：' + mail + '\n件名：【依頼】' + md + ' ' + esc(v('cus')) + '様\n\n' + esc(v('who')) + 'さん\n\n次の件をお願いします。\n\n番号：' + no + '\n日付：' + md + '\nお客様：' + esc(v('cus')) + '様\n経路：' + esc(v('from')) + ' → ' + esc(v('to')) + '\n備考：' + esc(v('memo') || 'なし') + '</div>';
+};
+
+// 2 請求書
+const S = [['INV-0901', '株式会社みどり企画', 132000, 'keiri@midori.example'], ['INV-0902', '青葉デザイン事務所', 55000, ''], ['INV-0903', '合同会社そら', 88000, 'info@sora.example']];
+$('s_tbl').tBodies[0].innerHTML = S.map((r, i) => '<tr>' + r.map((c, j) => '<td><input data-i="' + i + '" data-j="' + j + '" value="' + esc(c) + '"></td>').join('') + '</tr>').join('');
+$('s_go').onclick = () => {
+  document.querySelectorAll('#s_tbl input').forEach(x => S[x.dataset.i][x.dataset.j] = x.value);
+  const due = new Date(); due.setMonth(due.getMonth() + 2, 0); // 翌月末
+  const dueS = due.getFullYear() + '年' + (due.getMonth() + 1) + '月' + due.getDate() + '日';
+  let made = 0, skip = [];
+  $('s_out').innerHTML = S.map(r => {
+    if (!r[3].trim()) { skip.push(r[1]); return ''; }
+    made++;
+    const amt = Number(String(r[2]).replace(/[^\d]/g, ''));
+    return '<div class="inv"><div class="t">請求書</div>' + esc(r[1]) + ' 御中<br>請求番号：' + esc(r[0]) +
+      '<br>ご請求金額：<b>' + yen(amt) + '円</b>（税込）<br>お支払期限：' + dueS +
+      '<div class="mail">宛先：' + esc(r[3]) + '\n件名：請求書送付のご案内（' + esc(r[0]) + '）\n添付：請求書_' + esc(r[0]) + '_' + esc(r[1]) + '.pdf</div></div>';
+  }).join('');
+  $('s_msg').textContent = 'メールの下書きを' + made + '件作成しました。' + (skip.length ? 'メールアドレスが空欄の「' + skip.join('」「') + '」は作成していません。' : '');
+};
+
+// 3 AI 仕分け
+const A = [
+  {q: '昨日からログインできず、受注の入力が止まっています。至急見ていただけますか。', c: '不具合', u: true, r: 'ご不便をおかけしており申し訳ございません。ただいま状況を確認しております。お手数ですが、お使いの端末とブラウザ、表示されている画面の内容を教えていただけますでしょうか。わかり次第、本日中にご連絡いたします。'},
+  {q: '10名ほどの事務所で使いたいのですが、月額の料金と導入までの期間を知りたいです。', c: '見積もり', u: false, r: 'お問い合わせありがとうございます。10名さまでのご利用ですと、月額の目安と導入の流れをまとめた資料をお送りできます。ご希望の開始時期があれば教えてください。それに合わせた日程でご案内いたします。'},
+  {q: '来月末で使うのをやめたいです。手続きを教えてください。', c: '解約', u: false, r: 'ご連絡ありがとうございます。来月末でのご解約を承ります。手続きの方法と、保存されているデータの受け取り方をご案内いたします。差し支えなければ、ご解約の理由をお聞かせいただけますと、今後の参考にさせていただきます。'},
+  {q: '請求書の宛名を、先月から社名変更した新しい名前に変えてもらえますか。', c: 'その他', u: false, r: 'ご連絡ありがとうございます。請求書の宛名を新しい社名に変更いたします。お手数ですが、正式な社名の表記（株式会社の前後など）をお知らせください。次回の請求書から反映いたします。'}
+];
+$('a_list').innerHTML = A.map((a, i) => '<div class="box q" data-i="' + i + '" style="margin-bottom:6px">' + esc(a.q) + '</div>').join('');
+document.querySelectorAll('.q').forEach(el => el.onclick = () => {
+  document.querySelectorAll('.q').forEach(x => x.classList.toggle('on', x === el));
+  const a = A[el.dataset.i];
+  $('a_out').innerHTML = '<b>分類の結果</b><span class="tag">' + a.c + '</span>' + (a.u ? '<span class="tag w">急ぎ：担当者へ通知</span>' : '') +
+    '<b style="margin-top:8px">返信文の下書き（確認・修正してから送信）</b><div class="mail">' + esc(a.r) + '</div>';
+});
+
+// 4 期限
+const K = [['火災保険の更新', 30, ''], ['在庫：ドレッシング 24本', 7, ''], ['フォークリフト免許（鈴木）', 12, ''], ['事務所の賃貸契約', 1, ''], ['A社への支払い', -2, ''], ['コピー機のリース', 3, '済']];
+const base = new Date(); base.setHours(0, 0, 0, 0);
+const fmt = d => (d.getMonth() + 1) + '/' + d.getDate();
+$('k_tbl').tBodies[0].innerHTML = K.map(r => { const d = new Date(base); d.setDate(d.getDate() + r[1]); return '<tr><td>' + r[0] + '</td><td>' + fmt(d) + '</td><td>' + r[2] + '</td></tr>'; }).join('');
+const kRun = () => {
+  const off = Number($('k_slide').value); const today = new Date(base); today.setDate(today.getDate() + off);
+  $('k_today').textContent = fmt(today) + (off === 0 ? '（実際の今日）' : '');
+  const over = [], hit = [];
+  K.forEach(r => {
+    if (r[2]) return;
+    const due = new Date(base); due.setDate(due.getDate() + r[1]);
+    const left = Math.round((due - today) / 86400000);
+    if (left < 0) over.push('・' + r[0] + '（' + fmt(due) + '・' + (-left) + '日過ぎ）');
+    else if ([30, 7, 1, 0].includes(left)) hit.push('・' + r[0] + '（' + fmt(due) + '・' + (left ? 'あと' + left + '日' : '今日') + '）');
+  });
+  $('k_out').innerHTML = !over.length && !hit.length ? '<span class="muted">該当がないため、この日はメールを送りません</span>' :
+    '<div class="mail">件名：期限のお知らせ（' + (over.length + hit.length) + '件）\n\n' + (over.length ? '■ 期限を過ぎたもの\n' + over.join('\n') + '\n\n' : '') + (hit.length ? '■ 期限が近いもの\n' + hit.join('\n') : '') + '</div>';
+};
+$('k_slide').oninput = kRun; kRun();
+
+// 5 集計
+$('c_in').value = '日付,担当,商品,金額\n2026/09/01,佐藤,焼き菓子セット,3200\n2026/09/02,田中,コーヒー豆 200g,1800\n2026/09/03,佐藤,コーヒー豆 200g,1800\n2026/09/05,木村,焼き菓子セット,3200\n2026/09/08,田中,ギフト箱,5400\n2026/09/12,佐藤,ギフト箱,5400\n2026/09/15,木村,コーヒー豆 200g,1800\n2026/09/20,田中,焼き菓子セット,3200';
+$('c_go').onclick = () => {
+  const lines = $('c_in').value.trim().split('\n').map(l => l.split(','));
+  const h = lines.shift(); const iw = h.indexOf('担当'), ii = h.indexOf('商品'), ia = h.indexOf('金額');
+  if (iw < 0 || ii < 0 || ia < 0) { $('c_t1').textContent = '見出しに「担当」「商品」「金額」の列が必要です'; return; }
+  const sum = k => { const m = {}; lines.forEach(r => m[r[k]] = (m[r[k]] || 0) + (Number(r[ia]) || 0)); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
+  const w = sum(iw), it = sum(ii);
+  const t = (hd, rows) => '<table><tr><th>' + hd + '</th><th>売上</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td style="text-align:right">' + yen(r[1]) + '</td></tr>').join('') + '</table>';
+  $('c_t1').innerHTML = t('担当', w); $('c_t2').innerHTML = t('商品', it);
+  const max = Math.max(...w.map(r => r[1])), bh = 26;
+  $('c_chart').innerHTML = '<svg viewBox="0 0 400 ' + (w.length * bh + 10) + '" style="width:100%;max-width:520px;margin-top:12px">' +
+    w.map((r, i) => '<text x="0" y="' + (i * bh + 18) + '" font-size="12" fill="currentColor">' + esc(r[0]) + '</text><rect x="60" y="' + (i * bh + 5) + '" height="18" rx="3" width="' + (r[1] / max * 260) + '" fill="var(--acc)"/><text x="' + (66 + r[1] / max * 260) + '" y="' + (i * bh + 18) + '" font-size="12" fill="currentColor">' + yen(r[1]) + '</text>').join('') + '</svg>';
+};
+$('c_go').click();
+
+// #d1〜#d5 で開くと、その見本を表示する（提案文から直接リンクするため）
+// ?shot を付けると、その見本だけを結果つきで表示する（作品画像の撮影用）
+const hash = location.hash.slice(1);
+if (/^d[1-5]$/.test(hash)) {
+  document.querySelector('.tabs button[data-t="' + hash + '"]').click();
+  if (location.search.includes('shot')) {
+    [...document.querySelector('main').children].forEach(el => { if (el.id !== hash) el.style.display = 'none'; });
+    document.querySelectorAll('details').forEach(d => d.style.display = 'none');
+    ({d1: () => $('t_go').click(), d2: () => $('s_go').click(), d3: () => document.querySelector('.q').click(),
+      d4: () => { $('k_slide').value = 7; kRun(); }, d5: () => {}})[hash]();
+    window.scrollTo(0, 0);
+  }
+}
+</script>
+</body>
+</html>
