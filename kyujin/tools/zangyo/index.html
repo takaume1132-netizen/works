@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>残業時間の上限チェック｜36協定・特別条項（月45時間・年720時間・月100時間・平均80時間）</title>
+<meta name="description" content="12か月分の時間外労働と休日労働の時間を入れると、36協定の上限（月45時間・年360時間、特別条項の年720時間・月100時間未満・2〜6か月平均80時間・年6回）を超えていないかを確かめます。">
+<link rel="canonical" href="https://takaume1132-netizen.github.io/works/kyujin/tools/zangyo/">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<main>
+<header class="top"><a href="../../">そだつ求人票</a> ／ <a href="../">無料ツール</a> ／ 残業時間の上限チェック</header>
+<h1>残業時間の上限チェック（36協定）</h1>
+<p class="lead">1年分の時間外労働と休日労働の時間を入れると、上限を超えている月や期間をお知らせします。入れた数字は送信されません。</p>
+
+<div class="card">
+<div class="row"><label><input id="sp" type="checkbox"> 特別条項つきの36協定を結んでいる</label>
+<label><input id="hk" type="checkbox"> 1年単位の変形労働時間制（対象期間3か月超）</label></div>
+<div class="scroll"><table id="in"><thead><tr><th>月</th><th>時間外労働（時間）</th><th>法定休日の労働（時間）</th></tr></thead><tbody></tbody></table></div>
+<div class="row"><button class="btn" id="go">確かめる</button><button class="btn sub" id="ex">例を入れる</button></div>
+</div>
+
+<section id="result" hidden>
+<div class="cta" id="verdict"></div>
+<div id="list"></div>
+<p class="muted" id="note"></p>
+</section>
+
+<h2>上限のまとめ</h2>
+<ul>
+<li>原則：時間外労働は月45時間・年360時間まで（1年単位の変形労働時間制は月42時間・年320時間）</li>
+<li>特別条項があっても：時間外労働は年720時間まで、月45時間を超えられるのは年6か月まで</li>
+<li>特別条項の有無にかかわらず：時間外労働と休日労働の合計は、月100時間未満、2〜6か月のどの平均も80時間以内</li>
+</ul>
+<p class="muted">建設業・自動車運転の業務・医師などは、2024年4月から別の上限が定められています。根拠：労働基準法36条、厚生労働省「時間外労働の上限規制 わかりやすい解説」。</p>
+
+<footer><p><a href="../">ほかの無料ツール</a>　そだつ求人票（てまへら工房）</p></footer>
+</main>
+<script src="../../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var tb = document.querySelector('#in tbody');
+  for (var i = 1; i <= 12; i++) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + i + 'か月目</td><td><input type="number" min="0" step="0.5" class="ot" style="width:6em"></td><td><input type="number" min="0" step="0.5" class="hol" style="width:6em"></td>';
+    tb.appendChild(tr);
+  }
+  function el(tag, cls, t) { var e = document.createElement(tag); e.className = cls || ''; e.textContent = t || ''; return e; }
+  $('ex').addEventListener('click', function () {
+    var ot = [30, 50, 85, 70, 40, 30, 20, 30, 60, 45, 30, 20], hol = [0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0];
+    document.querySelectorAll('.ot').forEach(function (x, i) { x.value = ot[i]; });
+    document.querySelectorAll('.hol').forEach(function (x, i) { x.value = hol[i]; });
+    $('sp').checked = true;
+  });
+  $('go').addEventListener('click', function () {
+    var ots = document.querySelectorAll('.ot'), hols = document.querySelectorAll('.hol'), ms = [];
+    for (var i = 0; i < 12; i++) ms.push({ot: +ots[i].value || 0, hol: +hols[i].value || 0});
+    var r = KyujinTools.zangyo({months: ms, special: $('sp').checked, henkei: $('hk').checked});
+    $('result').hidden = false;
+    $('verdict').textContent = r.findings.length ? '上限を超えている所が ' + r.findings.length + '件 あります。' : '上限を超えている所はありません（年間の時間外労働 ' + r.totalOt + '時間）。';
+    var list = $('list'); list.textContent = '';
+    r.findings.forEach(function (f) { var b = el('div', 'f law'); b.appendChild(el('div', 't', f.title)); b.appendChild(el('div', 'd', f.detail)); list.appendChild(b); });
+    $('note').textContent = r.note;
+  });
+})();
+</script>
+</body>
+</html>

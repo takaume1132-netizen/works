@@ -61,3 +61,6 @@ li{margin:2px 0}
 .flow li::before{content:counter(s);position:absolute;left:0;top:6px;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;text-align:center;line-height:28px;font-size:14px;font-weight:600}
 .report{white-space:pre-wrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:14px}
 footer{margin-top:48px;font-size:13px;color:var(--sub)}
+input[type=number],input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:inherit;font-size:15px;max-width:100%}
+.card h3{margin-top:0}
+.card h3 a{text-decoration:none}

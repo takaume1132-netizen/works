@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>有給休暇の付与日数 計算ツール｜パート・アルバイトの比例付与に対応</title>
+<meta name="description" content="入社日と週の勤務日数・時間を入れると、年次有給休暇が何日付与されるかを計算します。パート・アルバイトの比例付与の表、次に増える日も表示します。">
+<link rel="canonical" href="https://takaume1132-netizen.github.io/works/kyujin/tools/yukyu/">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<main>
+<header class="top"><a href="../../">そだつ求人票</a> ／ <a href="../">無料ツール</a> ／ 有給休暇の付与日数</header>
+<h1>有給休暇は何日？付与日数の計算</h1>
+<p class="lead">入社日と、週の所定労働日数・時間を入れてください。パート・アルバイトの「比例付与」にも対応しています。</p>
+
+<div class="card">
+<div class="row"><label for="in">入社日</label><input id="in" type="date" value="2024-04-01"><label for="on">確認する日</label><input id="on" type="date"></div>
+<div class="row"><label for="wd">週の所定労働日数</label>
+<select id="wd"><option value="5">5日以上</option><option value="4">4日</option><option value="3">3日</option><option value="2">2日</option><option value="1">1日</option><option value="0">決まっていない（年間の日数で入れる）</option></select>
+<span id="ydw" hidden><label for="yd">年間の所定労働日数</label><input id="yd" type="number" min="0" value="150" style="width:6em"> 日</span></div>
+<div class="row"><label for="wh">週の所定労働時間</label><input id="wh" type="number" min="0" step="0.5" value="20" style="width:6em"> 時間</div>
+<button class="btn" id="go">計算する</button>
+</div>
+
+<section id="result" hidden>
+<div class="cta"><p id="main" style="font-size:20px;font-weight:600"></p><p id="sub"></p></div>
+<p class="muted" id="note"></p>
+</section>
+
+<h2>付与日数の表</h2>
+<div class="scroll"><table id="tbl"><thead><tr><th>週の日数（年間の日数）</th></tr></thead><tbody></tbody></table></div>
+<p class="muted">週の所定労働時間が30時間以上なら、週4日以下でも一番上の段（通常の日数）になります。出勤率が8割以上であることが条件です。根拠：労働基準法39条。</p>
+
+<footer><p><a href="../">ほかの無料ツール</a>　そだつ求人票（てまへら工房）</p></footer>
+</main>
+<script src="../../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var d = new Date();
+  $('on').value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  $('wd').addEventListener('change', function () { $('ydw').hidden = $('wd').value !== '0'; });
+  function months(a, b) {
+    var x = new Date(a), y = new Date(b);
+    var m = (y.getFullYear() - x.getFullYear()) * 12 + (y.getMonth() - x.getMonth());
+    if (y.getDate() < x.getDate()) m--;
+    return m;
+  }
+  function add(a, m) { var x = new Date(a); x.setMonth(x.getMonth() + m); return x.getFullYear() + '年' + (x.getMonth() + 1) + '月' + x.getDate() + '日'; }
+  $('go').addEventListener('click', function () {
+    var m = months($('in').value, $('on').value), wd = +$('wd').value;
+    var r = KyujinTools.yukyu({months: m, weekDays: wd || null, yearDays: wd ? null : +$('yd').value, weekHours: +$('wh').value});
+    $('result').hidden = false;
+    $('main').textContent = r.days ? '直近の付与は ' + r.days + '日（勤続' + r.step + '）' : 'まだ付与されていません';
+    $('sub').textContent = r.next ? '次は ' + add($('in').value, r.next.months) + ' に ' + r.next.days + '日 付与されます。' : (r.days ? 'これ以上は増えません（毎年 ' + r.days + '日）。' : add($('in').value, 6) + ' に初めて付与されます。');
+    $('note').textContent = (r.proportional ? 'パート・アルバイトの比例付与で計算しました。' : '') + r.note;
+  });
+  var head = document.querySelector('#tbl thead tr');
+  KyujinTools.STEPS.forEach(function (s) { var th = document.createElement('th'); th.textContent = s; head.appendChild(th); });
+  var labels = {5: '5日以上（217日以上）', 4: '4日（169〜216日）', 3: '3日（121〜168日）', 2: '2日（73〜120日）', 1: '1日（48〜72日）'};
+  [5, 4, 3, 2, 1].forEach(function (k) {
+    var tr = document.createElement('tr'), th = document.createElement('td'); th.textContent = labels[k]; tr.appendChild(th);
+    KyujinTools.YUKYU[k].forEach(function (n) { var td = document.createElement('td'); td.className = 'n'; td.textContent = n + '日'; tr.appendChild(td); });
+    document.querySelector('#tbl tbody').appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

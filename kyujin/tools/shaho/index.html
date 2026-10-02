@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>パート・アルバイトは社会保険に入る？判定ツール｜2026年10月「106万円の壁」撤廃に対応</title>
+<meta name="description" content="週の労働時間・会社の人数などを入れると、パート・アルバイトが厚生年金・健康保険に加入するかを判定します。2026年10月の賃金要件（106万円の壁）撤廃と、2027年10月からの企業規模要件の段階的な縮小に対応。">
+<link rel="canonical" href="https://takaume1132-netizen.github.io/works/kyujin/tools/shaho/">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<main>
+<header class="top"><a href="../../">そだつ求人票</a> ／ <a href="../">無料ツール</a> ／ 社会保険の加入判定</header>
+<h1>パート・アルバイトは社会保険に入る？</h1>
+<p class="lead">2026年10月1日から、月8.8万円（年収106万円）の賃金要件がなくなりました。会社の人数の要件も、2027年10月から段階的に下がります。いくつか入れるだけで、いま加入するか、いつから加入するかが分かります。</p>
+
+<div class="card">
+<div class="row"><label for="corp">会社の形</label>
+<select id="corp"><option value="1">法人（株式会社・合同会社など）</option><option value="0">個人事業</option></select></div>
+<div class="row"><label for="emp">会社の厚生年金の加入者数（パートを除く）</label><input id="emp" type="number" min="0" value="30" style="width:6em"> 人</div>
+<div class="row"><label for="wh">この人の週の所定労働時間</label><input id="wh" type="number" min="0" step="0.5" value="22" style="width:6em"> 時間
+<label for="md">月の所定労働日数</label><input id="md" type="number" min="0" value="12" style="width:5em"> 日</div>
+<div class="row"><label for="fwh">フルタイムの人の週の所定労働時間</label><input id="fwh" type="number" min="1" step="0.5" value="40" style="width:6em"> 時間
+<label for="fmd">月の所定労働日数</label><input id="fmd" type="number" min="1" value="21" style="width:5em"> 日</div>
+<div class="row"><label><input id="o2" type="checkbox" checked> 2か月を超えて雇う見込みがある</label>
+<label><input id="st" type="checkbox"> 昼間の学生である</label>
+<label><input id="ag" type="checkbox"> 労使の合意で、パートにも社会保険を適用している</label></div>
+<div class="row"><label for="date">判定する日</label><input id="date" type="date"></div>
+<button class="btn" id="go">判定する</button>
+</div>
+
+<section id="result" hidden>
+<div class="cta" id="verdict"></div>
+<ul id="reasons"></ul>
+<div id="tl"></div>
+</section>
+
+<h2>判定のしかた</h2>
+<ol>
+<li>週の所定労働時間と月の所定労働日数が、どちらもフルタイムの人の4分の3以上なら、会社の規模に関係なく加入します。</li>
+<li>それ未満でも、次のすべてに当てはまれば加入します。
+<ul><li>会社の加入者（パートを除く）が一定の人数以上（下の表）、または労使の合意で適用している</li>
+<li>週の所定労働時間が20時間以上</li>
+<li>2か月を超えて雇う見込みがある</li>
+<li>昼間の学生でない</li></ul></li>
+</ol>
+<div class="scroll"><table><tr><th>時期</th><th>対象になる会社の人数</th></tr>
+<tr><td>2026年9月まで</td><td>51人以上（加えて月8.8万円以上の賃金要件あり）</td></tr>
+<tr><td>2026年10月から</td><td>51人以上（賃金要件はなし）</td></tr>
+<tr><td>2027年10月から</td><td>36人以上</td></tr>
+<tr><td>2029年10月から</td><td>21人以上</td></tr>
+<tr><td>2032年10月から</td><td>11人以上</td></tr>
+<tr><td>2035年10月から</td><td>1人以上</td></tr></table></div>
+<p class="muted">個人事業の店・事務所は、業種と人数（常時5人以上か）によって適用事業所でない場合があります。計算は一般的な決まりによるもので、個別の判断は年金事務所にご確認ください。</p>
+
+<footer><p><a href="../">ほかの無料ツール</a>　そだつ求人票（てまへら工房）</p></footer>
+</main>
+<script src="../../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var d = new Date();
+  $('date').value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  function jd(s) { var p = s.split('-'); return p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日'; }
+  $('go').addEventListener('click', function () {
+    var r = KyujinTools.shaho({corp: $('corp').value === '1', employees: +$('emp').value, weekHours: +$('wh').value, monthDays: +$('md').value,
+      fullWeekHours: +$('fwh').value, fullMonthDays: +$('fmd').value, over2months: $('o2').checked, student: $('st').checked,
+      agreement: $('ag').checked, date: $('date').value});
+    $('result').hidden = false;
+    $('verdict').textContent = r.result === 'join' ? '社会保険（厚生年金・健康保険）に加入します。' : r.result === 'nojoin' ? 'いまは加入しません。' : '年金事務所への確認が必要です。';
+    var ul = $('reasons'); ul.textContent = '';
+    r.reasons.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    $('tl').textContent = r.from ? '会社の人数がこのままなら、' + jd(r.from) + 'から加入の対象になります。' : '';
+  });
+})();
+</script>
+</body>
+</html>
