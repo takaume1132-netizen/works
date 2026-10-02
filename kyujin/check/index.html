@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>求人票チェック（無料）｜書き漏れ・NG表現・最低賃金</title>
+<meta name="description" content="求人票を貼り付けるだけで、2024年4月から必要になった記載事項の漏れ、性別・年齢を限定する表現、2026年10月からの最低賃金を確認できます。入力した文章は送信されません。">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<header class="top"><a href="../">そだつ求人票</a> ／ 求人票チェック（無料）</header>
+<h1>求人票を貼り付けるだけで、書き漏れと注意したい表現を確認できます</h1>
+<p class="lead">2024年4月から求人票に書く項目が増え、2026年10月からは各地の最低賃金も上がりました。いま掲載している求人票を、そのまま貼り付けてお試しください。</p>
+<p class="muted">入力した文章はこの画面の中だけで確認し、どこにも送信・保存しません。</p>
+
+<div class="card">
+<label for="txt">求人票の本文</label>
+<textarea id="txt" placeholder="Indeed・求人誌・自社サイトなどに載せている求人票の文章を貼り付けてください"></textarea>
+<div class="row">
+<label for="pref">勤務地の都道府県</label>
+<select id="pref"><option value="">本文から読み取る</option></select>
+<label for="date">確認する日</label>
+<select id="date"></select>
+</div>
+<div class="row">
+<button class="btn" id="go">確認する</button>
+<button class="btn sub" id="sample">見本の求人票で試す</button>
+</div>
+</div>
+
+<section id="result" hidden>
+<div class="counts">
+<div class="c-law"><b id="n-law">0</b>違反のおそれ</div>
+<div class="c-missing"><b id="n-missing">0</b>記載漏れ</div>
+<div class="c-hint"><b id="n-hint">0</b>見直しのヒント</div>
+</div>
+<p class="muted" id="pref-note"></p>
+<div id="list"></div>
+<div class="cta">
+<p><b>直した求人票の作成もお受けしています</b></p>
+<p>質問にお答えいただくだけで、記載事項をそろえた求人票をお作りします。掲載後は応募の数を伺いながら、毎月の見直しも承ります。</p>
+<p><a class="btn" href="../#order">サービスの内容を見る</a></p>
+</div>
+</section>
+
+<h2>確認していること</h2>
+<ul>
+<li><b>記載漏れ</b>：職業安定法施行規則で求人票に書くことになっている項目（業務内容、契約期間、試用期間、就業場所、就業時間、休憩、休日、時間外労働、賃金、加入保険、受動喫煙対策、募集者の名称）。2024年4月から加わった「業務・就業場所の変更の範囲」「契約更新の上限」も確認します。</li>
+<li><b>性別・年齢</b>：「女性スタッフ募集」「主婦歓迎」「20〜35歳」「若い方歓迎」など、男女雇用機会均等法・労働施策総合推進法で原則として使えない表現。</li>
+<li><b>最低賃金</b>：時給が勤務地の最低賃金（令和8年度）を下回っていないか。発効日の前でも、これから上がる額に届いているかをお知らせします。</li>
+<li><b>固定残業代</b>：基本給、何時間分でいくらか、超えた分を追加で払うこと、の3点が書かれているか。</li>
+<li><b>応募を増やすための見直し</b>：決まり文句、1日の流れ、一緒に働く人数、応募後の流れなど。</li>
+</ul>
+<p class="muted">機械的な確認で、法律上の判断ではありません。例外に当たる場合など、迷うときは最寄りの労働局・ハローワーク、または社会保険労務士にご相談ください。根拠：<a href="https://www.mhlw.go.jp/content/001114110.pdf" rel="noopener">厚生労働省「募集時などに明示すべき労働条件が追加されます」</a>、<a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/" rel="noopener">地域別最低賃金の全国一覧</a>。</p>
+
+<h2>令和8年度の最低賃金（時給）</h2>
+<p class="muted">10月1日から順に切り替わります。発効日は都道府県ごとに異なります。</p>
+<div class="scroll"><table id="mw"><thead><tr><th>都道府県</th><th>改定後</th><th>改定前</th><th>発効日</th></tr></thead><tbody></tbody></table></div>
+
+<footer>
+<p>そだつ求人票（てまへら工房）　確認の決まり：2026-10-02.v1</p>
+</footer>
+</main>
+
+<script src="../assets/minwage.js"></script>
+<script src="../assets/check.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var SAMPLE = '★ホールスタッフ急募★\n女性スタッフ募集！20〜35歳くらいの方歓迎です。\nアットホームな職場で、誰でもできる簡単なお仕事です。\n\n給与：時給1,226円〜1,500円（研修中は時給1,200円）\n勤務地：東京都世田谷区（駅から徒歩3分）\n勤務時間：10:00〜15:00 シフト制\n休日：週2日〜\n未経験歓迎！主婦歓迎！\n';
+  var NAMES = {law: '違反のおそれ', missing: '記載漏れ', hint: '見直しのヒント'};
+
+  KyujinMinWage.prefs().forEach(function (p) {
+    var o = document.createElement('option'); o.value = p; o.textContent = p; $('pref').appendChild(o);
+  });
+  var today = new Date(), iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  [['今日', iso(today)], ['2026年12月2日（全都道府県の改定後）', '2026-12-02']].forEach(function (x) {
+    var o = document.createElement('option'); o.value = x[1]; o.textContent = x[0]; $('date').appendChild(o);
+  });
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+
+  function run() {
+    var r = KyujinCheck.check($('txt').value, {pref: $('pref').value || null, date: $('date').value});
+    $('result').hidden = false;
+    ['law', 'missing', 'hint'].forEach(function (k) { $('n-' + k).textContent = r.counts[k]; });
+    $('pref-note').textContent = r.prefs.length ? '勤務地：' + r.prefs.join('・') + ' として確認しました。' : '勤務地の都道府県が分からないため、最低賃金は確認していません（上で選べます）。';
+    var list = $('list'); list.textContent = '';
+    if (!r.findings.length) { list.appendChild(el('p', '', '気になる点は見つかりませんでした。')); }
+    ['law', 'missing', 'hint'].forEach(function (lv) {
+      var fs = r.findings.filter(function (f) { return f.level === lv; });
+      if (!fs.length) return;
+      list.appendChild(el('div', 'group-title', NAMES[lv] + '（' + fs.length + '件）'));
+      fs.forEach(function (f) {
+        var box = el('div', 'f ' + lv);
+        box.appendChild(el('div', 't', f.title));
+        if (f.where) box.appendChild(el('div', 'w', f.where));
+        box.appendChild(el('div', 'd', f.detail));
+        box.appendChild(el('div', 'x', f.fix));
+        list.appendChild(box);
+      });
+    });
+    $('result').scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
+  $('go').addEventListener('click', run);
+  $('sample').addEventListener('click', function () { $('txt').value = SAMPLE; run(); });
+
+  var tb = document.querySelector('#mw tbody');
+  KyujinMinWage.prefs().forEach(function (p) {
+    var before = KyujinMinWage.at(p, '2000-01-01'), tr = document.createElement('tr');
+    var d = before.nextDate.split('-');
+    [p, before.next.toLocaleString('ja-JP') + '円', before.current.toLocaleString('ja-JP') + '円', d[0] + '年' + (+d[1]) + '月' + (+d[2]) + '日'].forEach(function (v, i) {
+      var td = el('td', i === 1 || i === 2 ? 'n' : '', v); tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>
