@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カスハラ対策の方針・掲示文・対応手順を作る｜2026年10月の義務化（小さなお店向け・無料）</title>
+<meta name="description" content="2026年10月1日から、従業員が1人でもいれば全ての事業主にカスハラ対策が義務になりました。店名などを入れると、方針・お客さま向けの掲示文・従業員向けの対応手順・相談窓口の周知文ができます。厚生労働省の指針の10項目の確認表つき。">
+<link rel="canonical" href="https://takaume1132-netizen.github.io/works/kyujin/tools/kasuhara/">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<main>
+<header class="top"><a href="../../">そだつ求人票</a> ／ <a href="../">無料ツール</a> ／ カスハラ対策の文書</header>
+<h1>カスハラ対策の方針・掲示文・対応手順を作る</h1>
+<p class="lead">2026年10月1日から、従業員を1人でも雇っていれば、すべての事業主にカスタマーハラスメントの防止措置が義務になりました。店名などを入れると、そのまま使える文書ができます。入力した内容は送信されません。</p>
+
+<div class="card">
+<div class="row"><label for="nm">店名・会社名</label><input id="nm" type="text" value="みどり食堂" style="padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--card);color:var(--ink)"></div>
+<div class="row"><label for="bs">判断する人（役職）</label><input id="bs" type="text" value="店長" style="width:8em;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--card);color:var(--ink)">
+<label for="dk">相談窓口の担当</label><input id="dk" type="text" value="副店長" style="width:8em;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--card);color:var(--ink)"></div>
+<div class="row"><label for="ct">相談の方法</label><input id="ct" type="text" value="直接、または店の電話で" style="padding:6px 8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--card);color:var(--ink)"></div>
+<button class="btn" id="go">文書を作る</button>
+</div>
+
+<section id="out" hidden></section>
+
+<h2>指針で求められる10項目の確認</h2>
+<p class="muted">当てはまるものにチェックを入れてください（保存はされません）。</p>
+<div id="checks" class="card"></div>
+<p id="score" class="muted"></p>
+
+<p class="muted">カスハラの定義：顧客等の言動のうち、業務の性質に照らして社会通念上許容される範囲を超え、従業員の就業環境が害されるもの。同じ日から、求職者へのセクシュアルハラスメントの防止も義務になりました。ここで作る文書は一般的なひな形で、これだけで義務をすべて満たすとは限りません。就業規則の変更は社会保険労務士にご相談ください。根拠：改正労働施策総合推進法、厚生労働省の指針（2026年2月）。</p>
+
+<footer><p><a href="../">ほかの無料ツール</a>　そだつ求人票（てまへら工房）</p></footer>
+</main>
+<script src="../../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function block(title, text) {
+    var d = document.createElement('div'); d.className = 'card';
+    var h = document.createElement('h3'); h.textContent = title; d.appendChild(h);
+    var p = document.createElement('pre'); p.className = 'report'; p.textContent = text; d.appendChild(p);
+    var b = document.createElement('button'); b.className = 'btn sub'; b.textContent = 'コピーする';
+    b.addEventListener('click', function () {
+      navigator.clipboard && navigator.clipboard.writeText(text).then(function () { b.textContent = 'コピーしました'; });
+    });
+    d.appendChild(b);
+    return d;
+  }
+  $('go').addEventListener('click', function () {
+    var r = KyujinTools.kasuhara({name: $('nm').value.trim(), boss: $('bs').value.trim(), desk: $('dk').value.trim(), contact: $('ct').value.trim()});
+    var out = $('out'); out.textContent = ''; out.hidden = false;
+    out.appendChild(block('1. 方針（従業員に知らせる・社内に貼る）', r.policy));
+    out.appendChild(block('2. お客さま向けの掲示文（店頭・ホームページ）', r.notice));
+    out.appendChild(block('3. 対応の手順（従業員向け）', r.steps));
+    out.appendChild(block('4. 相談窓口の周知文', r.desk));
+    out.appendChild(block('5. 記録票', r.record));
+  });
+  var box = $('checks');
+  KyujinTools.KASUHARA_CHECKS.forEach(function (c, i) {
+    var l = document.createElement('label'); l.style.display = 'block'; l.style.margin = '6px 0'; l.style.color = 'var(--ink)';
+    var cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'kc';
+    l.appendChild(cb); l.appendChild(document.createTextNode(' 【' + c[0] + '】' + c[1]));
+    box.appendChild(l);
+  });
+  box.addEventListener('change', function () {
+    var n = document.querySelectorAll('.kc:checked').length;
+    $('score').textContent = '10項目中 ' + n + '項目 できています。' + (n < 10 ? '上の「文書を作る」で、方針・周知・窓口の文書を用意できます。' : '');
+  });
+})();
+</script>
+</body>
+</html>
